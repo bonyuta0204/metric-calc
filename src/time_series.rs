@@ -1,4 +1,8 @@
+use std::{borrow::BorrowMut, collections::HashMap};
+
 use chrono::{Date, Datelike, NaiveDate, ParseError};
+
+use crate::period_mapper::{PeriodMapKind, PeriodMapper};
 
 #[derive(Debug)]
 pub struct TimeSeries {
@@ -7,11 +11,12 @@ pub struct TimeSeries {
 
 #[derive(Debug)]
 pub struct Period {
-    idx: usize,
-    date: NaiveDate,
-    year: i32,
-    month: u32,
-    day: u32,
+    pub idx: usize,
+    pub date: NaiveDate,
+    pub year: i32,
+    pub month: u32,
+    pub day: u32,
+    pub period_map: HashMap<PeriodMapKind, usize>,
 }
 
 impl TimeSeries {
@@ -25,8 +30,20 @@ impl TimeSeries {
                 year: date.year(),
                 month: date.month(),
                 day: date.day(),
+                period_map: HashMap::new(),
             });
         }
         Ok(TimeSeries { periods })
+    }
+
+    pub fn add_period_map(&mut self, period_mapper: impl PeriodMapper) {
+        let period_mapping = period_mapper.map_period(&self.periods);
+        for (i, period) in self.periods.iter_mut().enumerate() {
+            if let Some(map_index) = period_mapping[i] {
+                period
+                    .period_map
+                    .insert(period_mapper.map_kind(), map_index);
+            }
+        }
     }
 }

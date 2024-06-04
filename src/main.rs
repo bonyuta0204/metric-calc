@@ -3,8 +3,10 @@ use std::{error::Error, fs::File};
 use chrono::{format::parse, ParseError};
 use csv::StringRecord;
 use metrics::Metric;
+use period_mapper::PrevioustMonthMapper;
 use time_series::TimeSeries;
 mod metrics;
+mod period_mapper;
 mod time_series;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -16,7 +18,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut records = rdr.into_records();
 
     let header = records.next().unwrap().expect("Failed to get header");
-    let time_series = parse_header_line(header)?;
+    let mut time_series = parse_header_line(header)?;
+
+    time_series.add_period_map(PrevioustMonthMapper {});
+
+    dbg!(&time_series);
 
     let metrics: Vec<_> = records
         .map(|record| {
@@ -24,8 +30,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             parse_body_line(line, &time_series).expect("Failed to parse body")
         })
         .collect();
-
-    dbg!(metrics);
 
     Ok(())
 }
