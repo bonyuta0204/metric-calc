@@ -6,6 +6,7 @@ use metrics::Metric;
 use period_mapper::PrevioustMonthMapper;
 use time_series::TimeSeries;
 mod metrics;
+mod metrics_calculator;
 mod period_mapper;
 mod time_series;
 

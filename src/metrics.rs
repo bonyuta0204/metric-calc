@@ -4,14 +4,14 @@ use crate::time_series::{Period, TimeSeries};
 
 #[derive(Debug)]
 pub struct Metric<'a> {
-    label: String,
-    values: Vec<MetricValue<'a>>,
+    pub label: String,
+    pub values: Vec<MetricValue<'a>>,
 }
 
 #[derive(Debug)]
 pub struct MetricValue<'a> {
-    period: &'a Period,
-    value: Option<i32>,
+    pub period: &'a Period,
+    pub value: Option<f64>,
 }
 
 impl<'a> Metric<'a> {
@@ -20,7 +20,7 @@ impl<'a> Metric<'a> {
         values: I,
         time_series: &'a TimeSeries,
     ) -> Result<Metric<'a>, Box<dyn Error>> {
-        let values: Vec<Option<i32>> = values.map(|v| v.parse::<i32>().ok()).collect();
+        let values: Vec<Option<f64>> = values.map(|v| v.parse::<f64>().ok()).collect();
         let metric_values: Vec<_> = values
             .into_iter()
             .enumerate()
