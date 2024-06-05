@@ -1,6 +1,9 @@
-use std::error::Error;
+use std::{collections::HashMap, error::Error};
 
-use crate::time_series::{Period, TimeSeries};
+use crate::{
+    metrics_calculator::{MetricCalculator, MetricValueKind},
+    time_series::{Period, TimeSeries},
+};
 
 #[derive(Debug)]
 pub struct Metric<'a> {
@@ -12,6 +15,7 @@ pub struct Metric<'a> {
 pub struct MetricValue<'a> {
     pub period: &'a Period,
     pub value: Option<f64>,
+    pub calculated_values: HashMap<MetricValueKind, f64>,
 }
 
 impl<'a> Metric<'a> {
@@ -27,6 +31,7 @@ impl<'a> Metric<'a> {
             .map(|(i, v)| MetricValue {
                 period: &time_series.periods[i],
                 value: v,
+                calculated_values: HashMap::new(),
             })
             .collect();
 
@@ -34,5 +39,17 @@ impl<'a> Metric<'a> {
             label: label.to_owned(),
             values: metric_values,
         })
+    }
+
+    pub fn calculate_metric(&mut self, calculator: impl MetricCalculator) {
+        let calc_result = calculator.calculate(self);
+        for (i, metric_value) in self.values.iter_mut().enumerate() {
+            let calc_value = calc_result[i];
+            if let Some(v) = calc_value {
+                metric_value
+                    .calculated_values
+                    .insert(calculator.metric_value_kind(), v);
+            }
+        }
     }
 }

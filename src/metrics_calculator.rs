@@ -1,12 +1,12 @@
 use crate::{metrics::Metric, period_mapper::PeriodMapKind};
 
-trait MetricCalculator {
-    fn calculate(&self, metric: Metric) -> Vec<Option<f64>>;
+pub trait MetricCalculator {
+    fn calculate(&self, metric: &Metric) -> Vec<Option<f64>>;
     fn metric_value_kind(&self) -> MetricValueKind;
 }
 
 #[derive(Hash, PartialEq, Eq, Debug)]
-enum MetricValueKind {
+pub enum MetricValueKind {
     PreviousMounthRatio,
 }
 
@@ -18,7 +18,7 @@ trait RatioMetricCalculator {
 }
 
 impl<T: RatioMetricCalculator> MetricCalculator for T {
-    fn calculate(&self, metric: Metric) -> Vec<Option<f64>> {
+    fn calculate(&self, metric: &Metric) -> Vec<Option<f64>> {
         metric
             .values
             .iter()
